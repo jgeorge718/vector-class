@@ -1,0 +1,236 @@
+// Joel George
+
+#include <iostream>
+using namespace std;
+
+template<typename T> class Vec {
+  public:
+      Vec();
+      Vec(int n);
+      Vec(int n, const T &a);
+
+      Vec(const Vec &orig);
+      Vec& operator= (const Vec &rhs);
+      ~Vec() { release(); }
+
+      int capacity() const { return _capacity; } // inline
+      int size() const { return _size; } // inline
+
+      T front() const;
+      T back() const;
+
+      void clear() { _size = 0; }
+      void pop_back();
+      void push_back(const T &a);
+
+      T& at(int n);
+      T& operator[] (int n) { return at(n); }
+      const T& operator[] (int n) const;
+  private:
+      void allocate();
+      void release();
+      int _capacity;
+      int _size;
+      T * _vec;
+};
+
+template<typename T>
+    Vec<T>::Vec() : _capacity(0), _size(0), _vec(NULL) {}
+
+template<typename T>
+    Vec<T>::Vec(int n) {
+        if (n <= 0) {
+            _size = 0, _capacity = 0;
+            _vec = NULL;
+        }
+        else {
+            _size = n, _capacity = n;
+            allocate();
+        }
+    }
+
+template<typename T>
+    Vec<T>::Vec(int n, const T &a) {
+        if (n <= 0) {
+            _size = 0, _capacity = 0;
+            _vec = NULL;
+        }
+        else {
+            _size = n, _capacity = n;
+            allocate();
+            for (int i = 0; i < _capacity; i++)
+                _vec[i] = a;
+        }
+    }
+
+template<typename T>
+    void Vec<T>::release() {
+        if (_vec != NULL)
+            delete [] _vec;
+        _vec = NULL;
+    }
+
+template<typename T>
+    void Vec<T>::allocate() {
+        if (_capacity > 0)
+            _vec = new T[_capacity];
+        else
+            _vec = NULL;
+    }
+
+template<typename T>
+    Vec<T>::Vec(const Vec &orig) {
+        _size = orig._size;
+        _capacity = orig._size;
+        allocate();
+        for (int i = 0; i < _size; i++)
+            _vec[i] = orig._vec[i];
+    }
+
+template<typename T>
+    Vec<T>& Vec<T>::operator= (const Vec<T> &rhs) {
+        if (this == &rhs)
+            return *this;
+        _size = rhs._size;
+        _capacity = rhs._size;
+        release();
+        allocate();
+        for (int i = 0; i < _size; i++)
+            _vec[i] = rhs._vec[i];
+        return *this;
+    }
+
+template<typename T>
+    T Vec<T>::front() const {
+        if (_size <= 0)
+            return 0;
+        else
+            return _vec[0];
+    }
+
+template<typename T>
+    T Vec<T>::back() const {
+        if (_size <= 0)
+            return 0;
+        else
+            return _vec[_size-1];
+    }
+
+template<typename T>
+    void Vec<T>::pop_back() {
+        if (_size > 0)
+            _size--;
+    }
+
+template<typename T>
+    void Vec<T>::push_back(const T &a) {
+        if (_size < _capacity) {
+            _vec[_size] = a;
+            _size++;
+        }
+        else {
+            if (_capacity == 0)
+                _capacity = 1;
+            else
+                _capacity *= 2;
+            T *oldvec = _vec;
+            _vec = new T[_capacity];
+            if (oldvec != NULL) {
+                for (int i = 0; i < _size; i++)
+                    _vec[i] = oldvec[i];
+            }
+            delete [] oldvec;
+            _vec[_size] = a;
+            _size++;
+        }
+    }
+
+template<typename T>
+    T& Vec<T>::at(int n) {
+        if ((n >= 0) && (n < _size))
+            return _vec[n];
+        else {
+            T *pnull = NULL;
+            return *pnull;
+        }
+    }
+
+template<typename T>
+    const T& Vec<T>::operator[] (int n) const {
+        if ((n >= 0) && (n < _size))
+            return _vec[n];
+        else {
+            T *pnull = NULL;
+            return *pnull;
+        }
+    }
+
+int main() {
+    // Vec<int>
+    Vec<int> vi;
+    cout << "size of default Vec<int> object: " << vi.size() << endl
+    << "capacity of default Vec<int> object: " << vi.capacity() << endl << endl;
+
+    Vec<int> vi1(4);
+    cout << "size of first non-default Vec<int> object: " << vi1.size() << endl
+    << "capacity of first non-default Vec<int> object: " << vi1.capacity() << endl << endl;
+
+    Vec<int> vi2(5, 7);
+    cout << "size of second non-default Vec<int> object: " << vi2.size() << endl
+    << "capacity of second non-default Vec<int> object: " << vi2.capacity() << endl << endl;
+
+    vi1 = vi2;
+    cout << "size of first non-default Vec<int> object: " << vi1.size() << endl
+    << "capacity of first non-default Vec<int> object: " << vi1.capacity() << endl << endl;
+
+    const Vec<int> vi3(7, 2);
+    cout << "fifth element in the vector: "<< vi3[4] << endl << endl;
+
+    cout << "front() test: " << vi2.front() << endl;
+    cout << "back() test: " << vi1.back() << endl << endl;
+
+    vi1.clear();
+    cout << "clear() test: " << vi1.size() << endl;
+    vi1.push_back(3); vi1.push_back(2); vi1.push_back(1);
+    cout << "push_back() test: ";
+    for (int i = 0; i < vi1.size(); i++)
+        cout << vi1[i] << " ";
+    cout << endl;
+    vi1.pop_back();
+    cout << "pop_back() test: " << vi1.back() << endl << endl << endl;
+
+    // Vec<double>
+    Vec<double> vd;
+    cout << "size of default Vec<double> object: " << vd.size() << endl
+    << "capacity of default Vec<double> object: " << vd.capacity() << endl << endl;
+
+    Vec<double> vd1(9);
+    cout << "size of first non-default Vec<double> object: " << vd1.size() << endl
+    << "capacity of first non-default Vec<double> object: " << vd1.capacity() << endl << endl;
+
+    Vec<double> vd2(3, 3.14159);
+    cout << "size of second non-default Vec<double> object: " << vd2.size() << endl
+    << "capacity of second non-default Vec<double> object: " << vd2.capacity() << endl << endl;
+
+    vd1 = vd2;
+    cout << "size of first non-default Vec<double> object: " << vd1.size() << endl
+    << "capacity of first non-default Vec<double> object: " << vd1.capacity() << endl << endl;
+
+    const Vec<double> vd3(7, 2.345);
+    cout << "fifth element in the vector: "<< vd3[4] << endl << endl;
+
+    cout << "front() test: " << vd2.front() << endl;
+    cout << "back() test: " << vd1.back() << endl << endl;
+
+    vd1.clear();
+    cout << "clear() test: " << vd1.size() << endl;
+    vd1.push_back(1.234); vd1.push_back(2.345); vd1.push_back(3.456);
+    cout << "push_back() test: ";
+    for (int i = 0; i < vd1.size(); i++)
+        cout << vd1[i] << " ";
+    cout << endl;
+    vd1.pop_back();
+    cout << "pop_back() test: " << vd1.back() << endl << endl;
+
+    return 0;
+}
